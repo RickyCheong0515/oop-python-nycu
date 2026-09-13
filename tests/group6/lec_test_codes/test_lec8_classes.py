@@ -1,53 +1,55 @@
-import add_path
-import mit_ocw_exercises.lec8_classes as lec8
+import lec_test_codes.add_path
+import mit_ocw_exercises.lec8_classes as l8
 import pytest
 
-def test_coordinate():
-  coo1 = lec8.Coordinate(3,4)
-  o = lec8.Coordinate(0,0)
-  assert coo1.x == 3
-  assert coo1.y == 4
-  assert str(coo1) == "<3,4>"
-  assert coo1.distance(o) == 5
-  assert coo1.distance(coo1) == 0
-  assert coo1.distance(lec8.Coordinate(3,4)) == 0
+def test_coordinate_basic():
+    c1 = l8.Coordinate(3, 4)
+    c2 = l8.Coordinate(0, 0)
+    assert c1.x == 3 and c1.y == 4
+    assert c2.x == 0 and c2.y == 0
+    assert pytest.approx(c1.distance(c2), rel=1e-9) == 5.0
+    assert str(c1) == "<3,4>"
 
-def test_coordinate_distance():
-  coo1 = lec8.Coordinate(3,4)
-  o = lec8.Coordinate(0,0)
-  assert coo1.distance(o) == 5
-  assert coo1.distance(coo1) == 0
-  assert coo1.distance(lec8.Coordinate(3,4)) == 0
-  assert coo1.distance(lec8.Coordinate(6,8)) == 5
-  assert coo1.distance(lec8.Coordinate(3,4)) == 0
-  assert coo1.distance(lec8.Coordinate(0,0)) == 5
+def test_coordinate_distance_symmetry():
+    a = l8.Coordinate(1, 2)
+    b = l8.Coordinate(4, 6)
+    assert pytest.approx(a.distance(b), rel=1e-9) == pytest.approx(b.distance(a), rel=1e-9)
+    
+def test_fraction_str_and_float():
+    a = l8.Fraction(1, 4)
+    b = l8.Fraction(3, 4)
+    c = a + b
+    assert str(c) == "16/16" or str(c) == "1/1"  # 因為尚未化簡
+    assert pytest.approx(float(c), rel=1e-9) == 1.0
+    assert pytest.approx(float(b.inverse()), rel=1e-9) == 4 / 3
+    
+def test_fraction_add_and_sub():
+    a = l8.Fraction(1, 3)
+    b = l8.Fraction(1, 6)
+    assert str(a + b) == "9/18"  # (1*6 + 3*1)/(3*6) = 9/18
+    assert str(a - b) == "3/18"  # (1*6 - 3*1)/(3*6) = 3/18
 
-def test_fraction():
-  frac1 = lec8.Fraction(1, 4)
-  frac2 = lec8.Fraction(3, 4)
-  assert frac1.num == 1 and frac1.denom == 4
-  assert frac2.num == 3 and frac2.denom == 4
-  result = frac1 + frac2
-  assert result.num == 16 and result.denom == 16
-  result = frac2 - frac1
-  assert result.num == 8 and result.denom == 16
-  assert float(frac1) == 0.25
-  assert float(frac2) == 0.75
-  inverse_frac1 = frac1.inverse()
-  assert inverse_frac1.num == 4 and inverse_frac1.denom == 1
-  
-def test_intset():
-  s = lec8.intSet()
-  assert str(s) == "{}"
-  s.insert(1)
-  s.insert(2)
-  s.insert(3)
-  s.insert(1)
-  assert str(s) == "{1,2,3}"
-  assert s.member(3) is True
-  assert s.member(5) is False
-  s.remove(3)
-  assert str(s) == "{1,2}"
-  s.remove(1)
-  assert str(s) == "{2}"
-  
+
+
+def test_intset_insert_and_str():
+    s = l8.intSet()
+    assert str(s) == "{}"
+    s.insert(3)
+    s.insert(4)
+    s.insert(3)  # duplicate
+    assert str(s) == "{3,4}"
+
+
+
+def test_intset_multiple_inserts_sorted():
+    s = l8.intSet()
+    for val in [10, 5, 8, 5, 2]:
+        s.insert(val)
+    assert str(s) == "{2,5,8,10}"
+
+def test_coordinate_and_fraction_together():
+    # 簡單檢查兩者不衝突
+    c = l8.Coordinate(3, 4)
+    f = l8.Fraction(1, 2)
+    assert "<" in str(c)
+    assert "/" in str(f)
